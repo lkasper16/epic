@@ -1,0 +1,12 @@
+<lccdd>
+
+  <display>
+  </display>
+  <define>
+  </define>
+
+  <documentation level="10">
+    ### Hcal configuration
+  </documentation>
+  <include ref="hcal/hcal_longforward.xml"/>
+</lccdd>

@@ -22,7 +22,7 @@ features:
     backward_PbWO4:
   solenoid:
   hcal:
-    forward:
+    forward_simplehcal:
     barrel_gdml:
     backward:
   far_forward:
