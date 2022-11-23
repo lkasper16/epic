@@ -149,9 +149,14 @@
   <include ref="${DETECTOR_PATH}/compact/hcal/forward_insert.xml"/>
   {% elif 'forward_simplehcal' in features['hcal'] -%}
   <include ref="${DETECTOR_PATH}/compact/hcal/forward.xml"/>
-  
   {% elif 'lfhcal' in features['hcal'] -%}
   <include ref="${DETECTOR_PATH}/compact/hcal/lfhcal.xml"/>
+  
+  {% elif 'lfhcal_wInsert' in features['hcal'] -%}
+  <include ref="${DETECTOR_PATH}/compact/hcal/lfhcal_wInsert.xml"/>
+  <include ref="${DETECTOR_PATH}/compact/hcal/forward_insert.xml"/>
+  {% elif 'forward_insert' in features['hcal'] -%}
+  <include ref="${DETECTOR_PATH}/compact/hcal/forward_insert.xml"/>
   {% endif -%}
 
    ## Backward H calorimetry
