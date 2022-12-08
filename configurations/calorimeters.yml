@@ -7,6 +7,7 @@ features:
     barrel_sciglass:
     backward_PbWO4:
   hcal:
-    forward_simplehcalwInlay:
+    forward:
+    forward_insert:
     barrel_gdml:
     backward:

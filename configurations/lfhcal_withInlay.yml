@@ -1,4 +1,4 @@
 features:
   hcal:
-    lfhcal_wInsert:
-    
+    lfhcal_insertGeom:
+    forward_insert:

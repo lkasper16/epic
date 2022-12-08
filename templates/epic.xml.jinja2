@@ -144,31 +144,9 @@
   <documentation level="10">
     ## Forward H calorimetry
   </documentation>
-  {% if features is not defined or features['hcal'] is none or 'forward_simplehcalwInlay' in features['hcal'] %}
-  <include ref="${DETECTOR_PATH}/compact/hcal/forward.xml"/>
-  <include ref="${DETECTOR_PATH}/compact/hcal/forward_insert.xml"/>
-  {% elif 'forward_simplehcal' in features['hcal'] -%}
-  <include ref="${DETECTOR_PATH}/compact/hcal/forward.xml"/>
-  {% elif 'lfhcal' in features['hcal'] -%}
-  <include ref="${DETECTOR_PATH}/compact/hcal/lfhcal.xml"/>
-  
-  {% elif 'lfhcal_wInsert' in features['hcal'] -%}
-  <include ref="${DETECTOR_PATH}/compact/hcal/lfhcal_wInsert.xml"/>
-  <include ref="${DETECTOR_PATH}/compact/hcal/forward_insert.xml"/>
-  {% elif 'forward_insert' in features['hcal'] -%}
-  <include ref="${DETECTOR_PATH}/compact/hcal/forward_insert.xml"/>
-  {% endif -%}
-
-   ## Backward H calorimetry
-  {% if features is not defined or features['hcal'] is none or 'backward' in features['hcal'] %}
-  <include ref="${DETECTOR_PATH}/compact/hcal/backward.xml"/>
-  {% endif -%}
-
-    ## Central H calorimetry
-  {% if features is not defined or features['hcal'] is none or 'barrel_gdml' in features['hcal'] %}
-  <include ref="${DETECTOR_PATH}/compact/hcal/barrel_gdml.xml"/>
-  {% endif -%}
-
+  {% for hcal in features['hcal'] -%}
+  <include ref="${DETECTOR_PATH}/compact/hcal/{{ hcal }}.xml"/>
+  {% endfor -%}
 {% endif -%}
 
 {% if 'beampipe' in features %}

@@ -563,7 +563,7 @@ Assembly createScintillatorPlateFourM( Detector& desc,
 //************************************************************************************************************
 //************************** create 8M module assembly  ******************************************************
 //************************************************************************************************************
-Assembly createEightMModule ( Detector& desc,
+Volume createEightMModule ( Detector& desc,
                               moduleParamsStrct mod_params,
                               std::vector<sliceParamsStrct> sl_params,
                               int modID,
@@ -573,8 +573,9 @@ Assembly createEightMModule ( Detector& desc,
   std::string baseName = "LFHCAL_8M"+_toString(modID, "_%d");
   
   // assembly definition
-  Assembly moduleAssembly(baseName);
-  moduleAssembly.setVisAttributes(mod_params.mod_visStr);
+  Box         modBox( mod_params.mod_width / 2., mod_params.mod_height / 2., length / 2.);
+  Volume  vol_mod(baseName,modBox,desc.material("Air"));
+  vol_mod.setVisAttributes(mod_params.mod_visStr);
 
   // placement operator
   PlacedVolume pvm;
@@ -626,7 +627,7 @@ Assembly createEightMModule ( Detector& desc,
                                                           sl_params[i].slice_thick, mod_params.mod_notchDepth, mod_params.mod_notchWidthAbsA, mod_params.mod_notchWidthAbsB, mod_params.mod_notchWidthAbsC,
                                                           slice_mat, sl_params[i].slice_regStr, sl_params[i].slice_limStr, sl_params[i].slice_visStr);
       // Placing slice within layer
-      pvm = moduleAssembly.placeVolume(modAbsAssembly, Transform3D(RotationZYX(0, 0, 0), Position(0., 0., slice_z)));
+      pvm = vol_mod.placeVolume(modAbsAssembly, Transform3D(RotationZYX(0, 0, 0), Position(0., 0., slice_z)));
     //*************************************************  
     // air & tyvek
     //*************************************************  
@@ -637,7 +638,7 @@ Assembly createEightMModule ( Detector& desc,
                                                           sl_params[i].slice_thick, mod_params.mod_notchDepth, mod_params.mod_notchWidthScin,
                                                           slice_mat, sl_params[i].slice_regStr, sl_params[i].slice_limStr, sl_params[i].slice_visStr);
       // Placing slice within layer
-      pvm = moduleAssembly.placeVolume(modFillAssembly, Transform3D(RotationZYX(0, 0, 0), Position(0., 0., slice_z)));
+      pvm = vol_mod.placeVolume(modFillAssembly, Transform3D(RotationZYX(0, 0, 0), Position(0., 0., slice_z)));
     //*************************************************
     // scintillator
     //*************************************************
@@ -649,27 +650,27 @@ Assembly createEightMModule ( Detector& desc,
                                                                   sl_params[i].slice_thick, mod_params.mod_notchDepth, mod_params.mod_notchWidthScin, mod_params.mod_sepDepth, 
                                                                   slice_mat, sl_params[i].slice_regStr, sl_params[i].slice_limStr, sl_params[i].slice_visStr, sens);
       // Placing slice within layer
-      pvm = moduleAssembly.placeVolume(modScintAssembly, Transform3D(RotationZYX(0, 0, 0), Position(0., 0., slice_z)));
+      pvm = vol_mod.placeVolume(modScintAssembly, Transform3D(RotationZYX(0, 0, 0), Position(0., 0., slice_z)));
     }
     slice_z += sl_params[i].slice_thick / 2.;
   }
   
   // placement 8M module casing
-  pvm = moduleAssembly.placeVolume(vol_modFrontPlate, Position(0, 0, -( length-mod_params.mod_FWThick) / 2. ));
-  pvm = moduleAssembly.placeVolume(vol_modBackPlate, Position(0, 0, ( length-mod_params.mod_BWThick) / 2. ));
-  pvm = moduleAssembly.placeVolume(vol_modSidePlateL, Position(-(mod_params.mod_width-mod_params.mod_SWThick)/2., 0,  (mod_params.mod_FWThick-mod_params.mod_BWThick)/2));
-  pvm = moduleAssembly.placeVolume(vol_modSidePlateR, Position((mod_params.mod_width-mod_params.mod_SWThick)/2., 0,(mod_params.mod_FWThick-mod_params.mod_BWThick)/2));
-  pvm = moduleAssembly.placeVolume(vol_modTopPlate, Position(0, (mod_params.mod_height-mod_params.mod_TWThick)/2., (mod_params.mod_FWThick-mod_params.mod_BWThick)/2));
-  pvm = moduleAssembly.placeVolume(vol_modBottomPlate, Position(0, -(mod_params.mod_height-mod_params.mod_TWThick)/2., (mod_params.mod_FWThick-mod_params.mod_BWThick)/2));
+  pvm = vol_mod.placeVolume(vol_modFrontPlate, Position(0, 0, -( length-mod_params.mod_FWThick) / 2. ));
+  pvm = vol_mod.placeVolume(vol_modBackPlate, Position(0, 0, ( length-mod_params.mod_BWThick) / 2. ));
+  pvm = vol_mod.placeVolume(vol_modSidePlateL, Position(-(mod_params.mod_width-mod_params.mod_SWThick)/2., 0,  (mod_params.mod_FWThick-mod_params.mod_BWThick)/2));
+  pvm = vol_mod.placeVolume(vol_modSidePlateR, Position((mod_params.mod_width-mod_params.mod_SWThick)/2., 0,(mod_params.mod_FWThick-mod_params.mod_BWThick)/2));
+  pvm = vol_mod.placeVolume(vol_modTopPlate, Position(0, (mod_params.mod_height-mod_params.mod_TWThick)/2., (mod_params.mod_FWThick-mod_params.mod_BWThick)/2));
+  pvm = vol_mod.placeVolume(vol_modBottomPlate, Position(0, -(mod_params.mod_height-mod_params.mod_TWThick)/2., (mod_params.mod_FWThick-mod_params.mod_BWThick)/2));
   
-  return moduleAssembly;
+  return vol_mod;
 }
 
 
 //************************************************************************************************************
 //************************** create 8M module assembly  ******************************************************
 //************************************************************************************************************
-Assembly createFourMModule ( Detector& desc,
+Volume createFourMModule ( Detector& desc,
                               moduleParamsStrct mod_params,
                               std::vector<sliceParamsStrct> sl_params,
                               int modID,
@@ -680,8 +681,9 @@ Assembly createFourMModule ( Detector& desc,
   std::string baseName = "LFHCAL_4M"+_toString(modID, "_%d");
   
   // assembly definition
-  Assembly moduleAssembly(baseName);
-  moduleAssembly.setVisAttributes(mod_params.mod_visStr);
+  Box         modBox( mod_params.mod_width / 2., mod_params.mod_height / 2., length / 2.);
+  Volume  vol_mod(baseName,modBox,desc.material("Air"));
+  vol_mod.setVisAttributes(mod_params.mod_visStr);
 
   // placement operator
   PlacedVolume pvm;
@@ -731,7 +733,7 @@ Assembly createFourMModule ( Detector& desc,
                                                               sl_params[i].slice_thick, mod_params.mod_notchDepth, mod_params.mod_notchWidthAbsA, mod_params.mod_notchWidthAbsC,
                                                               slice_mat, sl_params[i].slice_regStr, sl_params[i].slice_limStr, sl_params[i].slice_visStr);
       // Placing slice within layer
-      pvm = moduleAssembly.placeVolume(modAbsAssembly, Transform3D(RotationZYX(0, 0, 0), Position(0., 0., slice_z)));
+      pvm = vol_mod.placeVolume(modAbsAssembly, Transform3D(RotationZYX(0, 0, 0), Position(0., 0., slice_z)));
     //*************************************************  
     // air & tyvek
     //*************************************************  
@@ -741,7 +743,7 @@ Assembly createFourMModule ( Detector& desc,
                                                               sl_params[i].slice_thick, mod_params.mod_notchDepth, mod_params.mod_notchWidthScin,
                                                               slice_mat, sl_params[i].slice_regStr, sl_params[i].slice_limStr, sl_params[i].slice_visStr);
       // Placing slice within layer
-      pvm = moduleAssembly.placeVolume(modFillAssembly, Transform3D(RotationZYX(0, 0, 0), Position(0., 0., slice_z)));
+      pvm = vol_mod.placeVolume(modFillAssembly, Transform3D(RotationZYX(0, 0, 0), Position(0., 0., slice_z)));
     //*************************************************
     // scintillator
     //*************************************************
@@ -752,20 +754,20 @@ Assembly createFourMModule ( Detector& desc,
                                                                   sl_params[i].slice_thick, mod_params.mod_notchDepth, mod_params.mod_notchWidthScin, mod_params.mod_sepDepth, 
                                                                   slice_mat, sl_params[i].slice_regStr, sl_params[i].slice_limStr, sl_params[i].slice_visStr, sens);
       // Placing slice within layer
-      pvm = moduleAssembly.placeVolume(modScintAssembly, Transform3D(RotationZYX(0, 0, 0), Position(0., 0., slice_z)));
+      pvm = vol_mod.placeVolume(modScintAssembly, Transform3D(RotationZYX(0, 0, 0), Position(0., 0., slice_z)));
     }
     slice_z += sl_params[i].slice_thick/2.;
   }
   
   // placement 8M module casing
-  pvm = moduleAssembly.placeVolume(vol_modFrontPlate, Position(0, 0, -( length-mod_params.mod_FWThick) / 2. ));
-  pvm = moduleAssembly.placeVolume(vol_modBackPlate, Position(0, 0, ( length-mod_params.mod_BWThick) / 2. ));
-  pvm = moduleAssembly.placeVolume(vol_modSidePlateL, Position(-(mod_params.mod_width-mod_params.mod_SWThick)/2., 0,  (mod_params.mod_FWThick-mod_params.mod_BWThick)/2));
-  pvm = moduleAssembly.placeVolume(vol_modSidePlateR, Position((mod_params.mod_width-mod_params.mod_SWThick)/2., 0,(mod_params.mod_FWThick-mod_params.mod_BWThick)/2));
-  pvm = moduleAssembly.placeVolume(vol_modTopPlate, Position(0, (mod_params.mod_height-mod_params.mod_TWThick)/2., (mod_params.mod_FWThick-mod_params.mod_BWThick)/2));
-  pvm = moduleAssembly.placeVolume(vol_modBottomPlate, Position(0, -(mod_params.mod_height-mod_params.mod_TWThick)/2., (mod_params.mod_FWThick-mod_params.mod_BWThick)/2));
+  pvm = vol_mod.placeVolume(vol_modFrontPlate, Position(0, 0, -( length-mod_params.mod_FWThick) / 2. ));
+  pvm = vol_mod.placeVolume(vol_modBackPlate, Position(0, 0, ( length-mod_params.mod_BWThick) / 2. ));
+  pvm = vol_mod.placeVolume(vol_modSidePlateL, Position(-(mod_params.mod_width-mod_params.mod_SWThick)/2., 0,  (mod_params.mod_FWThick-mod_params.mod_BWThick)/2));
+  pvm = vol_mod.placeVolume(vol_modSidePlateR, Position((mod_params.mod_width-mod_params.mod_SWThick)/2., 0,(mod_params.mod_FWThick-mod_params.mod_BWThick)/2));
+  pvm = vol_mod.placeVolume(vol_modTopPlate, Position(0, (mod_params.mod_height-mod_params.mod_TWThick)/2., (mod_params.mod_FWThick-mod_params.mod_BWThick)/2));
+  pvm = vol_mod.placeVolume(vol_modBottomPlate, Position(0, -(mod_params.mod_height-mod_params.mod_TWThick)/2., (mod_params.mod_FWThick-mod_params.mod_BWThick)/2));
   
-  return moduleAssembly;
+  return vol_mod;
 }
 
 //********************************************************************************************
