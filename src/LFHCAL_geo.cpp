@@ -104,7 +104,8 @@ Volume createAbsorberPlateEightM(Detector& desc,
                                    Material slice_mat,
                                    std::string region,
                                    std::string limit,
-                                   std::string vis
+                                   std::string vis,
+                                   bool renderComp
 ){
   
   double w_plate  = (w_mod/2-t_mod_sp)*2;
@@ -167,7 +168,13 @@ Volume createAbsorberPlateEightM(Detector& desc,
     
   Volume      absplate_vol(basename, absplate, slice_mat);
   // Setting slice attributes
-  absplate_vol.setAttributes(desc, region, limit, vis);
+  if (renderComp){
+    absplate_vol.setAttributes(desc, region, limit, vis);
+  } else {
+    absplate_vol.setRegion(desc,region);
+    absplate_vol.setLimitSet(desc,limit);
+  }
+
   
   return absplate_vol;
   
@@ -189,7 +196,8 @@ Volume createAbsorberPlateFourM(Detector& desc,
                                    Material slice_mat,
                                    std::string region,
                                    std::string limit,
-                                   std::string vis
+                                   std::string vis,
+                                   bool renderComp
 ){
                                           // 0                 1                         2                          3            4
   const std::vector<double> xCoord      = { -(w_mod/2-t_mod_sp), -(w_mod/2-t_mod_sp-w_notchC),  -(w_mod/2-t_mod_sp-w_notchC),  -w_notchA/2,  -w_notchA/2,  
@@ -221,7 +229,12 @@ Volume createAbsorberPlateFourM(Detector& desc,
     
   Volume      absplate_vol(basename, absplate, slice_mat);
   // Setting slice attributes
-  absplate_vol.setAttributes(desc, region, limit, vis);
+  if (renderComp){
+    absplate_vol.setAttributes(desc, region, limit, vis);
+  } else {
+    absplate_vol.setRegion(desc,region);
+    absplate_vol.setLimitSet(desc,limit);
+  }
   
   return absplate_vol;
 }
@@ -242,7 +255,8 @@ Volume createFillerPlateEightM( Detector& desc,
                                    Material slice_mat,
                                    std::string region,
                                    std::string limit,
-                                   std::string vis
+                                   std::string vis,
+                                   bool renderComp
 ){
   double w_plate     = w_mod-2*t_mod_sp;
   double h_plate     = h_mod-2*t_mod_tp;
@@ -275,7 +289,13 @@ Volume createFillerPlateEightM( Detector& desc,
     
   Volume      filler_vol(basename, filler, slice_mat);
   // Setting slice attributes
-  filler_vol.setAttributes(desc, region, limit, vis);
+  if (renderComp){
+    filler_vol.setAttributes(desc, region, limit, vis);
+  } else {
+    filler_vol.setRegion(desc,region);
+    filler_vol.setLimitSet(desc,limit);
+  }
+  
   return filler_vol;
 }
 
@@ -294,7 +314,8 @@ Volume createFillerPlateFourM( Detector& desc,
                                    Material slice_mat,
                                    std::string region,
                                    std::string limit,
-                                   std::string vis
+                                   std::string vis,
+                                   bool renderComp
 ){
                                               // 0                 1                         2                          3            4
   const std::vector<double> xCoord      = { -(w_mod/2-t_mod_sp),   -w_notch/2,  -w_notch/2,  w_notch/2,    w_notch/2,      
@@ -322,7 +343,12 @@ Volume createFillerPlateFourM( Detector& desc,
     
   Volume      filler_vol(basename, filler, slice_mat);
   // Setting slice attributes
-  filler_vol.setAttributes(desc, region, limit, vis);
+  if (renderComp){
+    filler_vol.setAttributes(desc, region, limit, vis);
+  } else {
+    filler_vol.setRegion(desc,region);
+    filler_vol.setLimitSet(desc,limit);
+  }
   return filler_vol;
 }
 
@@ -341,7 +367,8 @@ Volume createScintillatorTower( Detector& desc,
                                    std::string region,
                                    std::string limit,
                                    std::string vis,
-                                  SensitiveDetector sens
+                                  SensitiveDetector sens,
+                                  bool renderComp
 ){
                                         // 0                1,              2,                3,          4
   const std::vector<double> xCoord      = { -(w_tow/2),   w_tow/2-w_notch,  w_tow/2-w_notch,  w_tow/2,    w_tow/2,      
@@ -366,7 +393,12 @@ Volume createScintillatorTower( Detector& desc,
   sens.setType("calorimeter");
   slice_vol.setSensitiveDetector(sens);  
   // Setting slice attributes
-  slice_vol.setAttributes(desc, region, limit, vis);
+  if (renderComp){
+    slice_vol.setAttributes(desc, region, limit, vis);
+  } else {
+    slice_vol.setRegion(desc,region);
+    slice_vol.setLimitSet(desc,limit);
+  }
   return slice_vol;
   
 }  
@@ -390,7 +422,8 @@ Assembly createScintillatorPlateEightM( Detector& desc,
                                         std::string region,
                                         std::string limit,
                                         std::string vis,
-                                        SensitiveDetector sens
+                                        SensitiveDetector sens,
+                                        bool renderComp
 ){
   // Tower placement in 8M module
   //======================================================================
@@ -445,7 +478,12 @@ Assembly createScintillatorPlateEightM( Detector& desc,
     
   Volume      ti0grid_vol(basename+"_Ti02Epoxy_"+_toString(layerID, "_layer_%d"), tiOgrid, slice_mat);
   // Setting slice attributes
-  ti0grid_vol.setAttributes(desc, region, limit, "LFHCALLayerTiOVis");
+  if (renderComp){
+    ti0grid_vol.setAttributes(desc, region, limit, "LFHCALLayerTiOVis");
+  } else {
+    ti0grid_vol.setRegion(desc,region);
+    ti0grid_vol.setLimitSet(desc,limit);
+  }
   pvm = modScintAssembly.placeVolume(ti0grid_vol, Position(0, 0, 0 ));
   
   // 8M module placement of scintillator for tower
@@ -460,10 +498,11 @@ Assembly createScintillatorPlateEightM( Detector& desc,
                     0,                                        0,                                        0,                                        0};
   // loop over all towers within same module
   for (int i = 0; i < 8; i++){
+//     std::cout << basename << _toString(i, "_tower_%d") << "\t"<< modID << "\t" << i << "\t"<< layerID << std::endl;
     Volume modScintTowerAss = createScintillatorTower( desc,  basename+ _toString(i, "_tower_%d"),  
                                                             w_tow, h_tow, t_slice,
                                                             h_notch, (w_notch-t_sep)/2, 
-                                                            slice_mat, region, limit, vis, sens);
+                                                            slice_mat, region, limit, vis, sens, renderComp);
     pvm = modScintAssembly.placeVolume(modScintTowerAss, Transform3D(RotationZYX(rotZ[i], rotY[i], rotX[i]), Position(posX[i], posY[i], posZ[i] )));
     pvm.addPhysVolID("module", modID).addPhysVolID("tower", i).addPhysVolID("layer", layerID);
   }
@@ -490,7 +529,8 @@ Assembly createScintillatorPlateFourM( Detector& desc,
                                         std::string region,
                                         std::string limit,
                                         std::string vis,
-                                        SensitiveDetector sens
+                                        SensitiveDetector sens,
+                                        bool renderComp 
 ){
   // Tower placement in 4M module
   //==================================
@@ -533,7 +573,12 @@ Assembly createScintillatorPlateFourM( Detector& desc,
     
   Volume      ti0grid_vol(basename+"_Ti02Epoxy_"+_toString(layerID, "_layer_%d"), tiOgrid, slice_mat);
   // Setting slice attributes
-  ti0grid_vol.setAttributes(desc, region, limit, "LFHCALLayerTiOVis");
+  if (renderComp){
+    ti0grid_vol.setAttributes(desc, region, limit, "LFHCALLayerTiOVis");
+  } else {
+   ti0grid_vol.setRegion(desc,region);
+   ti0grid_vol.setLimitSet(desc,limit);
+  }
   pvm = modScintAssembly.placeVolume(ti0grid_vol, Position(0, 0, 0 ));
   
   // 4M module placement of scintillator for tower
@@ -548,10 +593,11 @@ Assembly createScintillatorPlateFourM( Detector& desc,
                     0,                              0};
   // loop over all towers within same module
   for (int i = 0; i < 4; i++){
+//     std::cout << basename << _toString(i, "_tower_%d") << "\t"<< modID << "\t" << i << "\t"<< layerID << std::endl;
     Volume modScintTowerAss = createScintillatorTower( desc,  basename+ _toString(i, "_tower_%d"),  
                                                             w_tow, h_tow, t_slice,
                                                             h_notch, (w_notch-t_sep)/2., 
-                                                            slice_mat, region, limit, vis, sens);
+                                                            slice_mat, region, limit, vis, sens, renderComp);
     pvm = modScintAssembly.placeVolume(modScintTowerAss, Transform3D(RotationZYX(rotZ[i], rotY[i], rotX[i]), Position(posX[i], posY[i], posZ[i] )));
     pvm.addPhysVolID("module", modID).addPhysVolID("tower", i).addPhysVolID("layer", layerID);
   }
@@ -568,7 +614,8 @@ Volume createEightMModule ( Detector& desc,
                               std::vector<sliceParamsStrct> sl_params,
                               int modID,
                               double length,
-                              SensitiveDetector sens
+                              SensitiveDetector sens,
+                              bool renderComp
 ){
   std::string baseName = "LFHCAL_8M"+_toString(modID, "_%d");
   
@@ -601,12 +648,29 @@ Volume createEightMModule ( Detector& desc,
   Volume  vol_modTopPlate(baseName+"_TopPlate",modTopPlate,desc.material("Steel235"));
   Volume  vol_modBottomPlate(baseName+"_BottomPlate",modBottomPlate,desc.material("Steel235"));
   
-  vol_modFrontPlate.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
-  vol_modBackPlate.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
-  vol_modSidePlateL.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
-  vol_modSidePlateR.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
-  vol_modTopPlate.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
-  vol_modBottomPlate.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
+  if (renderComp){
+    vol_modFrontPlate.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
+    vol_modBackPlate.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
+    vol_modSidePlateL.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
+    vol_modSidePlateR.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
+    vol_modTopPlate.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
+    vol_modBottomPlate.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
+  } else {
+    vol_modFrontPlate.setRegion(desc,mod_params.mod_regStr);
+    vol_modFrontPlate.setLimitSet(desc,mod_params.mod_limStr);
+    vol_modBackPlate.setRegion(desc,mod_params.mod_regStr);
+    vol_modBackPlate.setLimitSet(desc,mod_params.mod_limStr);
+    vol_modSidePlateL.setRegion(desc,mod_params.mod_regStr);
+    vol_modSidePlateL.setLimitSet(desc,mod_params.mod_limStr);
+    vol_modSidePlateR.setRegion(desc,mod_params.mod_regStr);
+    vol_modSidePlateR.setLimitSet(desc,mod_params.mod_limStr);
+    vol_modTopPlate.setRegion(desc,mod_params.mod_regStr);
+    vol_modTopPlate.setLimitSet(desc,mod_params.mod_limStr);
+    vol_modBottomPlate.setRegion(desc,mod_params.mod_regStr);
+    vol_modBottomPlate.setLimitSet(desc,mod_params.mod_limStr);
+  }
+
+  
   
   int    layer_num = 1;
   
@@ -615,17 +679,17 @@ Volume createEightMModule ( Detector& desc,
   // Looping through the number of repeated layers & slices in each section
   for (int i = 0; i < (int)sl_params.size(); i++){
     slice_z += sl_params[i].slice_offset + sl_params[i].slice_thick / 2.; // Going to halfway point in layer
-
+    layer_num = sl_params[i].layer_ID-1;
     //*************************************************
     // absorber plates
     //*************************************************
     Material slice_mat = desc.material(sl_params[i].slice_matStr);
     if (sl_params[i].slice_partID == 1 ){
       Volume modAbsAssembly = createAbsorberPlateEightM( desc, 
-                                                          baseName+"_Abs"+_toString(sl_params[i].layer_ID, "_layer_%d")+_toString(sl_params[i].slice_ID, "slice_%d"),
+                                                          baseName+"_Abs"+_toString(sl_params[i].layer_ID, "_layer_%d"),
                                                           mod_params.mod_height, mod_params.mod_width, mod_params.mod_TWThick, mod_params.mod_SWThick,
                                                           sl_params[i].slice_thick, mod_params.mod_notchDepth, mod_params.mod_notchWidthAbsA, mod_params.mod_notchWidthAbsB, mod_params.mod_notchWidthAbsC,
-                                                          slice_mat, sl_params[i].slice_regStr, sl_params[i].slice_limStr, sl_params[i].slice_visStr);
+                                                          slice_mat, sl_params[i].slice_regStr, sl_params[i].slice_limStr, sl_params[i].slice_visStr, renderComp);
       // Placing slice within layer
       pvm = vol_mod.placeVolume(modAbsAssembly, Transform3D(RotationZYX(0, 0, 0), Position(0., 0., slice_z)));
     //*************************************************  
@@ -636,7 +700,7 @@ Volume createEightMModule ( Detector& desc,
                                                           baseName+"_Fill"+_toString(sl_params[i].layer_ID, "_layer_%d")+_toString(sl_params[i].slice_ID, "slice_%d"),
                                                           mod_params.mod_height, mod_params.mod_width, mod_params.mod_TWThick, mod_params.mod_SWThick,
                                                           sl_params[i].slice_thick, mod_params.mod_notchDepth, mod_params.mod_notchWidthScin,
-                                                          slice_mat, sl_params[i].slice_regStr, sl_params[i].slice_limStr, sl_params[i].slice_visStr);
+                                                          slice_mat, sl_params[i].slice_regStr, sl_params[i].slice_limStr, sl_params[i].slice_visStr, renderComp);
       // Placing slice within layer
       pvm = vol_mod.placeVolume(modFillAssembly, Transform3D(RotationZYX(0, 0, 0), Position(0., 0., slice_z)));
     //*************************************************
@@ -644,11 +708,11 @@ Volume createEightMModule ( Detector& desc,
     //*************************************************
     } else {
       Assembly modScintAssembly =  createScintillatorPlateEightM(  desc,
-                                                                  baseName+"_ScintAssembly"+_toString(sl_params[i].layer_ID, "_layer_%d")+_toString(sl_params[i].slice_ID, "slice_%d"),
+                                                                  baseName+"_ScintAssembly"+_toString(sl_params[i].layer_ID, "_layer_%d"),
                                                                   modID,  layer_num, 
                                                                   mod_params.mod_height, mod_params.mod_width, mod_params.mod_TWThick, mod_params.mod_SWThick,
                                                                   sl_params[i].slice_thick, mod_params.mod_notchDepth, mod_params.mod_notchWidthScin, mod_params.mod_sepDepth, 
-                                                                  slice_mat, sl_params[i].slice_regStr, sl_params[i].slice_limStr, sl_params[i].slice_visStr, sens);
+                                                                  slice_mat, sl_params[i].slice_regStr, sl_params[i].slice_limStr, sl_params[i].slice_visStr, sens, renderComp);
       // Placing slice within layer
       pvm = vol_mod.placeVolume(modScintAssembly, Transform3D(RotationZYX(0, 0, 0), Position(0., 0., slice_z)));
     }
@@ -675,7 +739,8 @@ Volume createFourMModule ( Detector& desc,
                               std::vector<sliceParamsStrct> sl_params,
                               int modID,
                               double length,
-                              SensitiveDetector sens
+                              SensitiveDetector sens,
+                              bool renderComp
 ){
 
   std::string baseName = "LFHCAL_4M"+_toString(modID, "_%d");
@@ -709,29 +774,44 @@ Volume createFourMModule ( Detector& desc,
   Volume  vol_modTopPlate(baseName+"_TopPlate",modTopPlate,desc.material("Steel235"));
   Volume  vol_modBottomPlate(baseName+"_BottomPlate",modBottomPlate,desc.material("Steel235"));
   
-  vol_modFrontPlate.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
-  vol_modBackPlate.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
-  vol_modSidePlateL.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
-  vol_modSidePlateR.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
-  vol_modTopPlate.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
-  vol_modBottomPlate.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
-  
+  if (renderComp){
+    vol_modFrontPlate.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
+    vol_modBackPlate.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
+    vol_modSidePlateL.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
+    vol_modSidePlateR.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
+    vol_modTopPlate.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
+    vol_modBottomPlate.setAttributes(desc, mod_params.mod_regStr, mod_params.mod_limStr, mod_params.mod_visStr);
+  } else {
+    vol_modFrontPlate.setRegion(desc,mod_params.mod_regStr);
+    vol_modFrontPlate.setLimitSet(desc,mod_params.mod_limStr);
+    vol_modBackPlate.setRegion(desc,mod_params.mod_regStr);
+    vol_modBackPlate.setLimitSet(desc,mod_params.mod_limStr);
+    vol_modSidePlateL.setRegion(desc,mod_params.mod_regStr);
+    vol_modSidePlateL.setLimitSet(desc,mod_params.mod_limStr);
+    vol_modSidePlateR.setRegion(desc,mod_params.mod_regStr);
+    vol_modSidePlateR.setLimitSet(desc,mod_params.mod_limStr);
+    vol_modTopPlate.setRegion(desc,mod_params.mod_regStr);
+    vol_modTopPlate.setLimitSet(desc,mod_params.mod_limStr);
+    vol_modBottomPlate.setRegion(desc,mod_params.mod_regStr);
+    vol_modBottomPlate.setLimitSet(desc,mod_params.mod_limStr);
+  }
+
   int    layer_num = 1;
   double slice_z   = -length/2+mod_params.mod_FWThick; // Keeps track of layers' local z locations
   
   // Looping through the number of repeated layers & slices in each section
   for (int i = 0; i < (int)sl_params.size(); i++){
     slice_z += sl_params[i].slice_offset + sl_params[i].slice_thick/2. ; // Going to halfway point in layer
-
+    layer_num = sl_params[i].layer_ID-1;
     //*************************************************
     // absorber plates
     //*************************************************
     Material slice_mat = desc.material(sl_params[i].slice_matStr);
     if (sl_params[i].slice_partID == 1 ){
-      Volume modAbsAssembly = createAbsorberPlateFourM( desc, baseName+"_Abs"+_toString(sl_params[i].layer_ID, "_layer_%d")+_toString(sl_params[i].slice_ID, "slice_%d"),
+      Volume modAbsAssembly = createAbsorberPlateFourM( desc, baseName+"_Abs"+_toString(sl_params[i].layer_ID, "_layer_%d"),
                                                               mod_params.mod_height, mod_params.mod_width, mod_params.mod_TWThick, mod_params.mod_SWThick,
                                                               sl_params[i].slice_thick, mod_params.mod_notchDepth, mod_params.mod_notchWidthAbsA, mod_params.mod_notchWidthAbsC,
-                                                              slice_mat, sl_params[i].slice_regStr, sl_params[i].slice_limStr, sl_params[i].slice_visStr);
+                                                              slice_mat, sl_params[i].slice_regStr, sl_params[i].slice_limStr, sl_params[i].slice_visStr, renderComp);
       // Placing slice within layer
       pvm = vol_mod.placeVolume(modAbsAssembly, Transform3D(RotationZYX(0, 0, 0), Position(0., 0., slice_z)));
     //*************************************************  
@@ -741,18 +821,18 @@ Volume createFourMModule ( Detector& desc,
       Volume modFillAssembly =  createFillerPlateFourM( desc, baseName+"_Fill"+_toString(sl_params[i].layer_ID, "_layer_%d")+_toString(sl_params[i].slice_ID, "slice_%d"),
                                                               mod_params.mod_height, mod_params.mod_width, mod_params.mod_TWThick, mod_params.mod_SWThick,
                                                               sl_params[i].slice_thick, mod_params.mod_notchDepth, mod_params.mod_notchWidthScin,
-                                                              slice_mat, sl_params[i].slice_regStr, sl_params[i].slice_limStr, sl_params[i].slice_visStr);
+                                                              slice_mat, sl_params[i].slice_regStr, sl_params[i].slice_limStr, sl_params[i].slice_visStr, renderComp);
       // Placing slice within layer
       pvm = vol_mod.placeVolume(modFillAssembly, Transform3D(RotationZYX(0, 0, 0), Position(0., 0., slice_z)));
     //*************************************************
     // scintillator
     //*************************************************
     } else {
-      Assembly modScintAssembly =  createScintillatorPlateFourM( desc,baseName+"_ScintAssembly"+_toString(sl_params[i].layer_ID, "_layer_%d")+_toString(sl_params[i].slice_ID, "slice_%d"),
+      Assembly modScintAssembly =  createScintillatorPlateFourM( desc,baseName+"_ScintAssembly"+_toString(sl_params[i].layer_ID, "_layer_%d"),
                                                                   modID,  layer_num, 
                                                                   mod_params.mod_height, mod_params.mod_width, mod_params.mod_TWThick, mod_params.mod_SWThick,
                                                                   sl_params[i].slice_thick, mod_params.mod_notchDepth, mod_params.mod_notchWidthScin, mod_params.mod_sepDepth, 
-                                                                  slice_mat, sl_params[i].slice_regStr, sl_params[i].slice_limStr, sl_params[i].slice_visStr, sens);
+                                                                  slice_mat, sl_params[i].slice_regStr, sl_params[i].slice_limStr, sl_params[i].slice_visStr, sens, renderComp);
       // Placing slice within layer
       pvm = vol_mod.placeVolume(modScintAssembly, Transform3D(RotationZYX(0, 0, 0), Position(0., 0., slice_z)));
     }
@@ -788,6 +868,16 @@ static Ref_t createDetector(Detector& desc, xml_h handle, SensitiveDetector sens
   double    length = dim.z();    // Size along z-axis
   xml_dim_t pos = detElem.position();
 
+  std::cout<< "global LFHCal position" << pos.x() << "\t" << pos.y() << "\t" << pos.z()  << std::endl;
+  
+  
+  bool renderComponents = getAttrOrDefault(detElem, _Unicode(renderComponents), 0.);
+  if (renderComponents) {
+    std::cout << "enabled visualization" << std::endl;
+  } else {
+    std::cout << "switchted off visualization" << std::endl;
+  }
+  
   // 8M module specific loading
   xml_comp_t  eightM_xml        = detElem.child(_Unicode(eightmodule));
   xml_dim_t eightMmod_dim        = eightM_xml.dimensions();
@@ -901,7 +991,7 @@ static Ref_t createDetector(Detector& desc, xml_h handle, SensitiveDetector sens
   } else {
     for (int e = 0; e < (int)xpos8M.size(); e++){
       if(e%20 == 0 ) std::cout <<  "LFHCAL placing 8M module: " << e << "/"<< (int)xpos8M.size() << "\t" << xpos8M[e] << "\t" << ypos8M[e] << "\t" << zpos8M[e]<< std::endl;
-      Assembly  eightMassembly = createEightMModule ( desc, eightM_params, slice_Params, moduleID, length, sens);
+      Volume  eightMassembly = createEightMModule ( desc, eightM_params, slice_Params, moduleID, length, sens, renderComponents);
       
       // Placing modules in world volume
 //       auto tr8M = Transform3D(Position(pos.x()-xpos8M[e]*dd4hep::cm-0.5*eightM_params.mod_width, pos.y()-ypos8M[e]*dd4hep::cm-0.5*eightM_params.mod_height, pos.z() +zpos8M[e]*dd4hep::cm + length / 2.));
@@ -952,7 +1042,7 @@ static Ref_t createDetector(Detector& desc, xml_h handle, SensitiveDetector sens
   } else {
     for (int f = 0; f < (int)xpos4M.size(); f++){
       if(f%20 == 0 )std::cout <<  "LFHCAL placing 4M module: " << f << "/"<< (int)xpos4M.size() << "\t" << xpos4M[f] << "\t" << ypos4M[f] << "\t" << zpos4M[f]<< std::endl;
-      Assembly  fourMassembly = createFourMModule ( desc, fourM_params, slice_Params,  moduleID, length, sens);
+      Volume  fourMassembly = createFourMModule ( desc, fourM_params, slice_Params,  moduleID, length, sens, renderComponents);
     // Placing modules in world volume
 //       auto tr4M = Transform3D(Position(pos.x()-xpos4M[f]*dd4hep::cm-0.5*fourM_params.mod_width, pos.y()-ypos4M[f]*dd4hep::cm-0.5*fourM_params.mod_height, pos.z() +zpos4M[f]*dd4hep::cm + length / 2.));
       auto tr4M = Transform3D(Position(pos.x()-xpos4M[f]*dd4hep::cm-0.5*fourM_params.mod_width, pos.y()-ypos4M[f]*dd4hep::cm, pos.z() +zpos4M[f]*dd4hep::cm + length / 2.));
@@ -960,6 +1050,8 @@ static Ref_t createDetector(Detector& desc, xml_h handle, SensitiveDetector sens
       moduleID++;
     }
   }
+  
+  
   phv.addPhysVolID("system", detID);
   det.setPlacement(phv);
 
