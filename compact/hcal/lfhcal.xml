@@ -22,8 +22,10 @@
     </documentation>
 
     <comment> FIXME: Need actual values once they are decided upon </comment>
-    <constant name="LFHCALLayer_NSteelRepeat" value="59"/>
-    <constant name="LFHCALLayer_NTungstenRepeat" value="5"/>
+    <constant name="LFHCALLayer_NSteelRepeat" value="1"/>
+    <constant name="LFHCALLayer_NTungstenRepeat" value="1"/>
+    <!-- <constant name="LFHCALLayer_NSteelRepeat" value="59"/>
+    <constant name="LFHCALLayer_NTungstenRepeat" value="5"/> -->
 
     <constant name="Mod_SideWallThickness"   value="1.9812* mm"/>
     <constant name="Mod_TopWallThickness"    value="0.5* mm"/>
@@ -173,7 +175,7 @@
   <readouts>
     <readout name="LFHCALHits">
       <segmentation type="CartesianGridXY" grid_size_x="50* mm" grid_size_y="50* mm"/>
-      <id>system:8,module:12,tower:3,part:1,layer:8,x:32:-16,y:-16</id>
+      <id>system:8,module:10,tower:6,layer:8,x:32:-16,y:-16</id>
     </readout>
   </readouts>
 
