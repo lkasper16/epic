@@ -14,6 +14,7 @@
   <vis name="AnlGold"         alpha="1" r="248/256" g="188/256" b="0/256"/>
   <vis name="AnlBlue"         alpha="1" r="0/256"   g="96/256"  b="156/256"/>
   <vis name="AnlTeal"         alpha="1" r="0/256"   g="161/256" b="156/256"/>
+  <vis name="AnlBrown"        alpha="1" r="160/256" g="82/256"  b="45/256"/>
   <vis name="AnlGray"         alpha="1" r="102/256" g="102/256" b="102/256"/>
   <vis name="AnlLight_Gray"   alpha="1" r="209/256" g="209/256" b="209/256"/>
   <vis name="AnlLightGray"    ref="AnlLight_Gray" />

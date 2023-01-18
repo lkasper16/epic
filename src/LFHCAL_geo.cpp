@@ -851,18 +851,18 @@ Volume createFourMModule(Detector& desc, moduleParamsStrct mod_params, std::vect
 static Ref_t createDetector(Detector& desc, xml_h handle, SensitiveDetector sens)
 {
   // global detector variables
-  xml_det_t   detElem = handle;
-  std::string detName = detElem.nameStr();
-  int         detID   = detElem.id();
+  xml_det_t   x_det = handle;
+  std::string detName = x_det.nameStr();
+  int         detID   = x_det.id();
 
   // general detector dimensions
-  xml_dim_t dim    = detElem.dimensions();
+  xml_dim_t dim    = x_det.dimensions();
   double    length = dim.z(); // Size along z-axis
-  xml_dim_t pos    = detElem.position();
+  xml_dim_t pos    = x_det.position();
 
   std::cout << "global LFHCal position" << pos.x() << "\t" << pos.y() << "\t" << pos.z() << std::endl;
 
-  bool renderComponents = getAttrOrDefault(detElem, _Unicode(renderComponents), 0.);
+  bool renderComponents = getAttrOrDefault(x_det, _Unicode(renderComponents), 0.);
   if (renderComponents) {
     std::cout << "enabled visualization" << std::endl;
   } else {
@@ -871,7 +871,7 @@ static Ref_t createDetector(Detector& desc, xml_h handle, SensitiveDetector sens
   sens.setType("calorimeter");
 
   // 8M module specific loading
-  xml_comp_t        eightM_xml    = detElem.child(_Unicode(eightmodule));
+  xml_comp_t        eightM_xml    = x_det.child(_Unicode(eightmodule));
   xml_dim_t         eightMmod_dim = eightM_xml.dimensions();
   moduleParamsStrct eightM_params(getAttrOrDefault(eightMmod_dim, _Unicode(widthBackInner), 0.),
                                   getAttrOrDefault(eightMmod_dim, _Unicode(heightBackInner), 0.),
@@ -890,7 +890,7 @@ static Ref_t createDetector(Detector& desc, xml_h handle, SensitiveDetector sens
                                   eightM_xml.regionStr(), eightM_xml.limitsStr());
 
   // 4M module specific loading
-  xml_comp_t        fourM_xml    = detElem.child(_Unicode(fourmodule));
+  xml_comp_t        fourM_xml    = x_det.child(_Unicode(fourmodule));
   xml_dim_t         fourMmod_dim = fourM_xml.dimensions();
   moduleParamsStrct fourM_params(
       getAttrOrDefault(fourMmod_dim, _Unicode(widthBackInner), 0.),
@@ -909,7 +909,7 @@ static Ref_t createDetector(Detector& desc, xml_h handle, SensitiveDetector sens
 
   std::vector<sliceParamsStrct> slice_Params;
   int                           layer_num = 1;
-  for (xml_coll_t c(detElem, _U(layer)); c; ++c) {
+  for (xml_coll_t c(x_det, _U(layer)); c; ++c) {
     xml_comp_t x_layer = c;
     int        repeat  = x_layer.repeat();
     // Looping through the number of repeated layers in each section
