@@ -1,7 +1,7 @@
 ebeam: 18
 pbeam: 275
 features:
-  beampipe:
+  # beampipe:
   tracking:
     definitions:
     vertex_barrel:
@@ -25,7 +25,7 @@ features:
     forward:
     barrel_gdml:
     backward:
-  far_forward:
-    far_forward_arches:
-  far_backward:
-    far_backward:
+  # far_forward:
+  #   far_forward_arches:
+  # far_backward:
+  #   far_backward:

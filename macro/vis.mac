@@ -1,10 +1,16 @@
-/vis/open OGL 800x800-0+0
+#/vis/open OGL 1500x1000-0+0
+/vis/open OGL 3500x1800-0+0
 
+
+#/vis/viewer/set/viewpointThetaPhi 260 -40
+/vis/viewer/set/viewpointThetaPhi 200 -20
+/vis/viewer/set/background white
 /vis/drawVolume
-/vis/viewer/set/viewpointThetaPhi 30 30
-#/vis/viewer/zoom 30.
+#/vis/viewer/zoom 2
 #/vis/viewer/set/style wireframe
 #/vis/scene/add/axes 0 0 0 1 m
+#/vis/viewer/addCutawayPlane 0 0 0 m 1 0 0
+#/vis/viewer/addCutawayPlane 0 0 0 m 0 -1 0
 /vis/scene/add/trajectories rich smooth
 /vis/modeling/trajectories/create/drawByCharge
 #/vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
@@ -19,10 +25,10 @@
 #/vis/filtering/trajectories/particleFilter-0/active true
 
 
-/vis/ogl/set/displayListLimit 500000
+/vis/ogl/set/displayListLimit 5000000
 
 /vis/viewer/flush
 
-/run/beamOn 1
+#/run/beamOn 1
 
 #/control/execute macro/gun.mac
