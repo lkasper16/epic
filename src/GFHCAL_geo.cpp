@@ -17,7 +17,8 @@ using namespace dd4hep;
 //************************************************************************************************************
 //************************** create 8M module assembly  ******************************************************
 //************************************************************************************************************
-Volume createEightMModule(Detector& desc, int modID_x, int modID_y, double length, SensitiveDetector sens)
+Volume createEightMModule(Detector& desc, int modID_x, int modID_y, double length, SensitiveDetector sens,
+                          int doSamplingFractionStudies)
 {
   double modBox_length_tot      = length;
   double modBox_length          = modBox_length_tot - 10 * cm;
@@ -74,6 +75,7 @@ Volume createEightMModule(Detector& desc, int modID_x, int modID_y, double lengt
 
   Box    steelAbsorberBox(absorber_thickness / 2., modBox_height / 2., modBox_steel_length / 2.);
   Volume vol_steelAbsorberBox(baseName + "_FeAbsorber8M", steelAbsorberBox, desc.material("Steel235"));
+  if(doSamplingFractionStudies==3) vol_steelAbsorberBox.setMaterial(desc.material("Tungsten"));
   if (visDetails) {
     vol_steelAbsorberBox.setVisAttributes(desc.visAttributes("AnlLight_Gray"));
   } else {
@@ -82,6 +84,7 @@ Volume createEightMModule(Detector& desc, int modID_x, int modID_y, double lengt
 
   Box    tungstenAbsorberBox(absorber_thickness / 2., modBox_height / 2., modBox_tungsten_length / 2.);
   Volume vol_tungstenAbsorberBox(baseName + "_WAbsorber8M", tungstenAbsorberBox, desc.material("Tungsten"));
+  if(doSamplingFractionStudies==2) vol_tungstenAbsorberBox.setMaterial(desc.material("Steel235"));
   if (visDetails) {
     vol_tungstenAbsorberBox.setVisAttributes(desc.visAttributes("AnlViolet"));
   } else {
@@ -114,9 +117,9 @@ Volume createEightMModule(Detector& desc, int modID_x, int modID_y, double lengt
 
   double miniBox_thickness = absorber_thickness + pcb_thickness + sciSeg_width_tot + miniframe_thickness * 2;
   // std::cout << "miniBox_thickness 8M = " << miniBox_thickness << std::endl;
-  int    nLayers_x         = (int)((modBox_width - 2 * modBox_sidewall_thickness) / miniBox_thickness);
-  int    nLayers_z         = (int)(modBox_length / sciSeg_length_tot);
-  int    nLayers_y         = 2;
+  int nLayers_x = (int)((modBox_width - 2 * modBox_sidewall_thickness) / miniBox_thickness);
+  int nLayers_z = (int)(modBox_length / sciSeg_length_tot);
+  int nLayers_y = 2;
 
   vol_modBox.placeVolume(
       vol_steelWallBox,
@@ -126,35 +129,66 @@ Volume createEightMModule(Detector& desc, int modID_x, int modID_y, double lengt
       Transform3D(RotationZYX(0, 0, 0), Position(modBox_width / 2 - modBox_sidewall_thickness / 2, 0, 0)));
 
   for (int ilx = 0; ilx < nLayers_x; ilx++) {
-    vol_modBox.placeVolume(
+    if (doSamplingFractionStudies) {
+      sens.setType("calorimeter");
+      vol_steelAbsorberBox.setSensitiveDetector(sens);
+    }
+    pvm = vol_modBox.placeVolume(
         vol_steelAbsorberBox,
         Transform3D(RotationZYX(0, 0, 0), Position(-modBox_width / 2 + modBox_sidewall_thickness +
-                                                       absorber_thickness / 2 + ilx * miniBox_thickness,
-                                                   0, 0)));
+                                                       absorber_thickness / 2 + ilx * miniBox_thickness, 0, 0)));
+    if (doSamplingFractionStudies) {
+      pvm.addPhysVolID("modulex", modID_x);
+      pvm.addPhysVolID("moduley", modID_y);
+      pvm.addPhysVolID("layerx", ilx);
+      pvm.addPhysVolID("passive", 1);
+    }
 
-    vol_modBox.placeVolume(
+    if (doSamplingFractionStudies) {
+      sens.setType("calorimeter");
+      vol_tungstenAbsorberBox.setSensitiveDetector(sens);
+    }
+    pvm = vol_modBox.placeVolume(
         vol_tungstenAbsorberBox,
         Transform3D(RotationZYX(0, 0, 0), Position(-modBox_width / 2 + modBox_sidewall_thickness +
                                                        absorber_thickness / 2 + ilx * miniBox_thickness,
                                                    0, -modBox_length_tot / 2 + modBox_tungsten_length / 2)));
-
+    if (doSamplingFractionStudies) {
+      pvm.addPhysVolID("modulex", modID_x);
+      pvm.addPhysVolID("moduley", modID_y);
+      pvm.addPhysVolID("layerx", ilx);
+      pvm.addPhysVolID("passive", 2);
+    }
     vol_modBox.placeVolume(vol_pcbBox,
                            Transform3D(RotationZYX(0, 0, 0),
                                        Position(-modBox_width / 2 + modBox_sidewall_thickness + absorber_thickness +
-                                                    miniframe_thickness + pcb_thickness / 2 + ilx * miniBox_thickness,
-                                                0, 0)));
-
-    vol_modBox.placeVolume(
+                                                    miniframe_thickness + pcb_thickness / 2 + ilx * miniBox_thickness, 0, 0)));
+    if (doSamplingFractionStudies) {
+      sens.setType("calorimeter");
+      vol_steelMiniFrameBox.setSensitiveDetector(sens);
+    }
+    pvm = vol_modBox.placeVolume(
         vol_steelMiniFrameBox,
         Transform3D(RotationZYX(0, 0, 0), Position(-modBox_width / 2 + modBox_sidewall_thickness + absorber_thickness +
-                                                       miniframe_thickness / 2 + ilx * miniBox_thickness,
-                                                   0, 0)));
-    vol_modBox.placeVolume(
+                                                       miniframe_thickness / 2 + ilx * miniBox_thickness, 0, 0)));
+    if (doSamplingFractionStudies) {
+      pvm.addPhysVolID("modulex", modID_x);
+      pvm.addPhysVolID("moduley", modID_y);
+      pvm.addPhysVolID("layerx", ilx);
+      pvm.addPhysVolID("layery", 0);
+      pvm.addPhysVolID("passive", 3);
+    }
+    pvm = vol_modBox.placeVolume(
         vol_steelMiniFrameBox,
         Transform3D(RotationZYX(0, 0, 0), Position(-modBox_width / 2 + modBox_sidewall_thickness + miniBox_thickness -
-                                                       miniframe_thickness / 2 + ilx * miniBox_thickness,
-                                                   0, 0)));
-
+                                                       miniframe_thickness / 2 + ilx * miniBox_thickness, 0, 0)));
+    if (doSamplingFractionStudies) {
+      pvm.addPhysVolID("modulex", modID_x);
+      pvm.addPhysVolID("moduley", modID_y);
+      pvm.addPhysVolID("layerx", ilx);
+      pvm.addPhysVolID("layery", 1);
+      pvm.addPhysVolID("passive", 3);
+    }
     vol_modBox.placeVolume(
         vol_tyvekBox,
         Transform3D(RotationZYX(0, 0, 0),
@@ -194,7 +228,7 @@ Volume createEightMModule(Detector& desc, int modID_x, int modID_y, double lengt
 //************************************************************************************************************
 //************************** create 12M module assembly  ******************************************************
 //************************************************************************************************************
-Volume createTwelveMModule(Detector& desc, int modID_x, int modID_y, double length, SensitiveDetector sens)
+Volume createTwelveMModule(Detector& desc, int modID_x, int modID_y, double length, SensitiveDetector sens, int doSamplingFractionStudies)
 {
   double modBox_length_tot      = length;
   double modBox_length          = modBox_length_tot - 10 * cm;
@@ -208,7 +242,7 @@ Volume createTwelveMModule(Detector& desc, int modID_x, int modID_y, double leng
 
   int visDetails = 0;
   visDetails     = 1;
-  // int visDetails = 2;
+  // visDetails = 2;
 
   // std::cout << "create 12M module" << std::endl;
   // std::cout << "length = " << length << std::endl;
@@ -254,6 +288,7 @@ Volume createTwelveMModule(Detector& desc, int modID_x, int modID_y, double leng
 
   Box    steelAbsorberBox(absorber_thickness / 2., modBox_height / 2., modBox_steel_length / 2.);
   Volume vol_steelAbsorberBox(baseName + "_FeAbsorber12M", steelAbsorberBox, desc.material("Steel235"));
+  if(doSamplingFractionStudies==3) vol_steelAbsorberBox.setMaterial(desc.material("Tungsten"));
   if (visDetails) {
     vol_steelAbsorberBox.setVisAttributes(desc.visAttributes("AnlLight_Gray"));
   } else {
@@ -262,6 +297,7 @@ Volume createTwelveMModule(Detector& desc, int modID_x, int modID_y, double leng
 
   Box    tungstenAbsorberBox(absorber_thickness / 2., modBox_height / 2., modBox_tungsten_length / 2.);
   Volume vol_tungstenAbsorberBox(baseName + "_WAbsorber12M", tungstenAbsorberBox, desc.material("Tungsten"));
+  if(doSamplingFractionStudies==2) vol_tungstenAbsorberBox.setMaterial(desc.material("Steel235"));
   if (visDetails) {
     vol_tungstenAbsorberBox.setVisAttributes(desc.visAttributes("AnlBlue"));
   } else {
@@ -294,9 +330,9 @@ Volume createTwelveMModule(Detector& desc, int modID_x, int modID_y, double leng
 
   double miniBox_thickness = absorber_thickness + pcb_thickness + sciSeg_width_tot + miniframe_thickness * 2;
   // std::cout << "miniBox_thickness 8M = " << miniBox_thickness << std::endl;
-  int    nLayers_x         = (int)((modBox_width - 2 * modBox_sidewall_thickness) / miniBox_thickness);
-  int    nLayers_z         = (int)(modBox_length / sciSeg_length_tot);
-  int    nLayers_y         = 2;
+  int nLayers_x = (int)((modBox_width - 2 * modBox_sidewall_thickness) / miniBox_thickness);
+  int nLayers_z = (int)(modBox_length / sciSeg_length_tot);
+  int nLayers_y = 2;
 
   double addAbsorber_thickness = (modBox_width - 2 * modBox_sidewall_thickness) - nLayers_x * miniBox_thickness;
   Box    steelAbsorberBoxAdd(addAbsorber_thickness / 2., modBox_height / 2., modBox_steel_length / 2.);
@@ -313,7 +349,6 @@ Volume createTwelveMModule(Detector& desc, int modID_x, int modID_y, double leng
   } else {
     vol_tungstenAbsorberBoxAdd.setVisAttributes(desc.visAttributes("InvisibleNoDaughters"));
   }
-
   vol_modBox.placeVolume(
       vol_steelWallBox,
       Transform3D(RotationZYX(0, 0, 0), Position(-modBox_width / 2 + modBox_sidewall_thickness / 2, 0, 0)));
@@ -331,35 +366,76 @@ Volume createTwelveMModule(Detector& desc, int modID_x, int modID_y, double leng
                                               0, -modBox_length_tot / 2 + modBox_tungsten_length / 2)));
 
   for (int ilx = 0; ilx < nLayers_x; ilx++) {
-    vol_modBox.placeVolume(
+    
+    if (doSamplingFractionStudies) {
+      sens.setType("calorimeter");
+      vol_steelAbsorberBox.setSensitiveDetector(sens);
+    }
+    pvm = vol_modBox.placeVolume(
         vol_steelAbsorberBox,
         Transform3D(RotationZYX(0, 0, 0), Position(-modBox_width / 2 + modBox_sidewall_thickness +
                                                        absorber_thickness / 2 + ilx * miniBox_thickness,
                                                    0, 0)));
+    if (doSamplingFractionStudies) {
+      pvm.addPhysVolID("modulex", modID_x);
+      pvm.addPhysVolID("moduley", modID_y);
+      pvm.addPhysVolID("layerx", ilx);
+      pvm.addPhysVolID("passive", 1);
+    }
 
-    vol_modBox.placeVolume(
+    if (doSamplingFractionStudies) {
+      sens.setType("calorimeter");
+      vol_tungstenAbsorberBox.setSensitiveDetector(sens);
+    }
+    pvm = vol_modBox.placeVolume(
         vol_tungstenAbsorberBox,
         Transform3D(RotationZYX(0, 0, 0), Position(-modBox_width / 2 + modBox_sidewall_thickness +
                                                        absorber_thickness / 2 + ilx * miniBox_thickness,
                                                    0, -modBox_length_tot / 2 + modBox_tungsten_length / 2)));
-
+    if (doSamplingFractionStudies) {
+      pvm.addPhysVolID("modulex", modID_x);
+      pvm.addPhysVolID("moduley", modID_y);
+      pvm.addPhysVolID("layerx", ilx);
+      pvm.addPhysVolID("passive", 2);
+    }
+    
     vol_modBox.placeVolume(vol_pcbBox,
                            Transform3D(RotationZYX(0, 0, 0),
                                        Position(-modBox_width / 2 + modBox_sidewall_thickness + absorber_thickness +
                                                     miniframe_thickness + pcb_thickness / 2 + ilx * miniBox_thickness,
                                                 0, 0)));
 
-    vol_modBox.placeVolume(
+    
+    if (doSamplingFractionStudies) {
+      sens.setType("calorimeter");
+      vol_steelMiniFrameBox.setSensitiveDetector(sens);
+    }
+    pvm = vol_modBox.placeVolume(
         vol_steelMiniFrameBox,
         Transform3D(RotationZYX(0, 0, 0), Position(-modBox_width / 2 + modBox_sidewall_thickness + absorber_thickness +
                                                        miniframe_thickness / 2 + ilx * miniBox_thickness,
                                                    0, 0)));
-    vol_modBox.placeVolume(
+    
+    if (doSamplingFractionStudies) {
+      pvm.addPhysVolID("modulex", modID_x);
+      pvm.addPhysVolID("moduley", modID_y);
+      pvm.addPhysVolID("layerx", ilx);
+      pvm.addPhysVolID("layery", 0);
+      pvm.addPhysVolID("passive", 3);
+    }
+    pvm = vol_modBox.placeVolume(
         vol_steelMiniFrameBox,
         Transform3D(RotationZYX(0, 0, 0), Position(-modBox_width / 2 + modBox_sidewall_thickness + miniBox_thickness -
                                                        miniframe_thickness / 2 + ilx * miniBox_thickness,
                                                    0, 0)));
 
+    if (doSamplingFractionStudies) {
+      pvm.addPhysVolID("modulex", modID_x);
+      pvm.addPhysVolID("moduley", modID_y);
+      pvm.addPhysVolID("layerx", ilx);
+      pvm.addPhysVolID("layery", 1);
+      pvm.addPhysVolID("passive", 3);
+    }
     vol_modBox.placeVolume(
         vol_tyvekBox,
         Transform3D(RotationZYX(0, 0, 0),
@@ -380,8 +456,8 @@ Volume createTwelveMModule(Detector& desc, int modID_x, int modID_y, double leng
             vol_scintBox,
             Transform3D(RotationZYX(0, 0, 0),
                         Position(-modBox_width / 2 + modBox_sidewall_thickness + absorber_thickness +
-                                  miniframe_thickness + pcb_thickness + sciSeg_width_tot / 2 +
-                                  ilx * miniBox_thickness,
+                                     miniframe_thickness + pcb_thickness + sciSeg_width_tot / 2 +
+                                     ilx * miniBox_thickness,
                                  -modBox_height / 2 + sciSeg_height_tot / 2 + ily * sciSeg_height_tot,
                                  -modBox_length_tot / 2 + sciSeg_length_tot / 2 + ilz * sciSeg_length_tot)));
         pvm.addPhysVolID("modulex", modID_x);
@@ -405,10 +481,15 @@ Volume createTwelveMModule(Detector& desc, int modID_x, int modID_y, double leng
 //********************************************************************************************
 static Ref_t createDetector(Detector& desc, xml_h handle, SensitiveDetector sens)
 {
+
+
   // global detector variables
   xml_det_t   x_det    = handle;
   int         det_id   = x_det.id();
   std::string det_name = x_det.nameStr();
+
+  int    doSamplingFractionStudies        = getAttrOrDefault(x_det, _Unicode(doSamplingFractionStudies), 0);
+  std::cout << "doSamplingFractionStudies = " << doSamplingFractionStudies << std::endl;
 
   xml_dim_t dim    = x_det.dimensions();
   double    length = dim.z(); // Size along z-axis
@@ -462,32 +543,29 @@ static Ref_t createDetector(Detector& desc, xml_h handle, SensitiveDetector sens
   }
 
   if (xpos8M.size() != ypos8M.size()) {
-    std::cout << xpos8M.size() << "\t" << ypos8M.size()<< std::endl;
+    std::cout << xpos8M.size() << "\t" << ypos8M.size() << std::endl;
     std::cout << "idiot you can't count" << std::endl;
   } else {
     for (int e = 0; e < (int)xpos8M.size(); e++) {
       if (e % 20 == 0)
         std::cout << "GFHCAL placing 8M module: " << e << "/" << (int)xpos8M.size() << "\t" << xpos8M[e] << "\t"
                   << ypos8M[e] << std::endl;
-      moduleIDx             = ((xpos8M[e] + 270) / 10);
-      moduleIDy             = ((ypos8M[e] + 265) / 10);
-      if(moduleIDx<0 || moduleIDy<0){
+      moduleIDx = ((xpos8M[e] + 270) / 10);
+      moduleIDy = ((ypos8M[e] + 265) / 10);
+      if (moduleIDx < 0 || moduleIDy < 0) {
         // std::cout << "GFHCAL placing 8M module: " << e << "/" << (int)xpos8M.size() << "\t" << xpos8M[e] << "\t"
         //           << ypos8M[e] << "\t" << zpos8M[e] << std::endl;
         std::cout << "GFHCAL WRONG ID FOR 8M module: " << e << "/" << (int)xpos8M.size() << "\t" << moduleIDx << "\t"
                   << moduleIDy << std::endl;
       }
-      Volume eightMassembly = createEightMModule(desc, moduleIDx, moduleIDy, length, sens);
+      Volume eightMassembly = createEightMModule(desc, moduleIDx, moduleIDy, length, sens, doSamplingFractionStudies);
 
-      auto tr8M =
-          Transform3D(Position( pos.x() - xpos8M[e] * dd4hep::cm - 0.5 * 20 * cm,
-                                pos.y() - ypos8M[e] * dd4hep::cm,
-                                pos.z() + length / 2.));
-      phv = assembly.placeVolume(eightMassembly, tr8M);
+      auto tr8M = Transform3D(Position(pos.x() - xpos8M[e] * dd4hep::cm - 0.5 * 20 * cm,
+                                       pos.y() - ypos8M[e] * dd4hep::cm, pos.z() + length / 2.));
+      phv       = assembly.placeVolume(eightMassembly, tr8M);
       phv.addPhysVolID("modulex", moduleIDx);
       phv.addPhysVolID("moduley", moduleIDy);
       phv.addPhysVolID("passive", 0);
-
     }
   }
 
@@ -535,20 +613,19 @@ static Ref_t createDetector(Detector& desc, xml_h handle, SensitiveDetector sens
         std::cout << "GFHCAL placing 12M module: " << e << "/" << (int)xpos12M.size() << "\t" << xpos12M[e] << "\t"
                   << ypos12M[e] << std::endl;
 
-      moduleIDx             = ((xpos12M[e] + 275) / 10);
-      moduleIDy             = ((ypos12M[e] + 265) / 10);
-      if(moduleIDx<0 || moduleIDy<0){
+      moduleIDx = ((xpos12M[e] + 275) / 10);
+      moduleIDy = ((ypos12M[e] + 265) / 10);
+      if (moduleIDx < 0 || moduleIDy < 0) {
         // std::cout << "GFHCAL placing 8M module: " << e << "/" << (int)xpos8M.size() << "\t" << xpos8M[e] << "\t"
         //           << ypos8M[e] << "\t" << zpos8M[e] << std::endl;
         std::cout << "GFHCAL WRONG ID FOR 8M module: " << e << "/" << (int)xpos8M.size() << "\t" << moduleIDx << "\t"
                   << moduleIDy << std::endl;
       }
-      Volume eightMassembly = createTwelveMModule(desc, moduleIDx, moduleIDy, length, sens);
+      Volume eightMassembly = createTwelveMModule(desc, moduleIDx, moduleIDy, length, sens, doSamplingFractionStudies);
 
-      auto tr12M =
-          Transform3D(Position(pos.x() - xpos12M[e] * dd4hep::cm - 10 * cm, pos.y() - ypos12M[e] * dd4hep::cm,
-                               pos.z() + length / 2.));
-      phv = assembly.placeVolume(eightMassembly, tr12M);
+      auto tr12M = Transform3D(Position(pos.x() - xpos12M[e] * dd4hep::cm - 10 * cm, pos.y() - ypos12M[e] * dd4hep::cm,
+                                        pos.z() + length / 2.));
+      phv        = assembly.placeVolume(eightMassembly, tr12M);
       phv.addPhysVolID("modulex", moduleIDx);
       phv.addPhysVolID("moduley", moduleIDy);
       phv.addPhysVolID("passive", 0);

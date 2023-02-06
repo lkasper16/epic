@@ -6,7 +6,7 @@
 /vis/viewer/set/viewpointThetaPhi 200 -20
 /vis/viewer/set/background white
 /vis/drawVolume
-#/vis/viewer/zoom 2
+/vis/viewer/zoom 2
 #/vis/viewer/set/style wireframe
 #/vis/scene/add/axes 0 0 0 1 m
 #/vis/viewer/addCutawayPlane 0 0 0 m 1 0 0
@@ -24,6 +24,9 @@
 #/vis/filtering/trajectories/particleFilter-0/verbose true
 #/vis/filtering/trajectories/particleFilter-0/active true
 
+/vis/filtering/trajectories/create/attributeFilter
+/vis/filtering/trajectories/attributeFilter-0/setAttribute IMag
+/vis/filtering/trajectories/attributeFilter-0/addInterval 2 MeV 1000 GeV
 
 /vis/ogl/set/displayListLimit 5000000
 
