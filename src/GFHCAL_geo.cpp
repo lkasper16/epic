@@ -18,7 +18,7 @@ using namespace dd4hep;
 //************************** create module assembly  ******************************************************
 //************************************************************************************************************
 Volume createModule(Detector& desc, int modID_x, int modID_y, double length, SensitiveDetector sens,
-                    int doSamplingFractionStudies, bool isLargeMod)
+                    int doSamplingFractionStudies, bool isLargeMod, bool useMoreLayers)
 {
   double modBox_face_width      = 1.5*cm;
   double modBox_length_tot      = length - 2*modBox_face_width;
@@ -64,13 +64,16 @@ Volume createModule(Detector& desc, int modID_x, int modID_y, double length, Sen
   double modBox_sidewall_thickness = 2 * mm;
   // double modBox_topwall_thickness = 0.5* mm;
   double absorber_thickness = 16.8 * mm;
+  if(useMoreLayers) {
+    absorber_thickness = 12.1 * mm;
+  }
 
   double pcb_gap       = 1.19 * mm;
   double pcb_thickness = 1.18 * mm;
   double pcb_height    = modBox_height - 3 * miniframe_thickness;
 
   double fullLayer_width = absorber_thickness + pcb_gap + sciSeg_width_tot + miniframe_thickness * 2;
-  std::cout << "gfhcal fullLayer_width = " << fullLayer_width << std::endl;
+  // std::cout << "gfhcal fullLayer_width = " << fullLayer_width << std::endl;
   double miniframe_width = pcb_gap + sciSeg_width_tot + miniframe_thickness * 2;
 
   Box scintBox(sciSeg_width / 2., sciSeg_height / 2., sciSeg_length / 2.);
@@ -374,6 +377,8 @@ static Ref_t createDetector(Detector& desc, xml_h handle, SensitiveDetector sens
 
   int doSamplingFractionStudies = getAttrOrDefault(x_det, _Unicode(doSamplingFractionStudies), 0);
   std::cout << "doSamplingFractionStudies = " << doSamplingFractionStudies << std::endl;
+  int useMoreLayers = getAttrOrDefault(x_det, _Unicode(useMoreLayers), 0);
+  std::cout << "useMoreLayers = " << useMoreLayers << std::endl;
 
   xml_dim_t dim    = x_det.dimensions();
   double    length = dim.z(); // Size along z-axis
@@ -442,7 +447,7 @@ static Ref_t createDetector(Detector& desc, xml_h handle, SensitiveDetector sens
         std::cout << "GFHCAL WRONG ID FOR 8M module: " << e << "/" << (int)xpos8M.size() << "\t" << moduleIDx << "\t"
                   << moduleIDy << std::endl;
       }
-      Volume eightMassembly = createModule(desc, moduleIDx, moduleIDy, length, sens, doSamplingFractionStudies, false);
+      Volume eightMassembly = createModule(desc, moduleIDx, moduleIDy, length, sens, doSamplingFractionStudies, false, useMoreLayers);
       // Volume eightMassembly = createEightMModule(desc, moduleIDx, moduleIDy, length, sens,
       // doSamplingFractionStudies);
 
@@ -507,7 +512,7 @@ static Ref_t createDetector(Detector& desc, xml_h handle, SensitiveDetector sens
         std::cout << "GFHCAL WRONG ID FOR 8M module: " << e << "/" << (int)xpos8M.size() << "\t" << moduleIDx << "\t"
                   << moduleIDy << std::endl;
       }
-      Volume eightMassembly = createModule(desc, moduleIDx, moduleIDy, length, sens, doSamplingFractionStudies, true);
+      Volume eightMassembly = createModule(desc, moduleIDx, moduleIDy, length, sens, doSamplingFractionStudies, true, useMoreLayers);
       // Volume eightMassembly = createTwelveMModule(desc, moduleIDx, moduleIDy, length, sens,
       // doSamplingFractionStudies);
 
